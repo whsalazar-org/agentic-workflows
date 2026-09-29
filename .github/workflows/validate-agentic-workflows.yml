@@ -1,0 +1,44 @@
+name: Validate agentic workflows
+
+# Recompiles every agentic workflow (.github/workflows/*.md) and fails if the
+# committed .lock.yml files are out of date.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install gh-aw CLI
+        uses: github/gh-aw-actions/setup-cli@508571a870bda59126a2ec44bb343818ad5e7ef7 # v0.89.21
+        with:
+          version: v0.89.21
+
+      - name: Compile agentic workflows
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: gh aw compile --schedule-seed "$REPO" --actionlint
+
+      - name: Ensure lock files are up to date
+        run: |
+          if [ -n "$(git status --porcelain -- .github/workflows)" ]; then
+            git status --porcelain -- .github/workflows
+            git diff -- .github/workflows
+            echo "::error::Lock files are out of date. Run 'gh aw compile' locally and commit the results."
+            exit 1
+          fi
