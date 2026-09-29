@@ -20,6 +20,7 @@ separate, validated **safe-outputs** jobs.
 | [`hello-agentic-world.md`](.github/workflows/hello-agentic-world.md) | Manual (`workflow_dispatch`) | Explores the repo and opens an issue greeting you and describing the demo | `create-issue` |
 | [`issue-triage.md`](.github/workflows/issue-triage.md) | Issue opened / reopened, or manual | Classifies the issue, looks for duplicates, and comments | `add-labels`, `add-comment` |
 | [`daily-repo-status.md`](.github/workflows/daily-repo-status.md) | Weekday schedule, or manual | Summarizes the last 24h of activity in a status-report issue (older reports auto-closed) | `create-issue` |
+| [`code-improvement.md`](.github/workflows/code-improvement.md) | New issue opened | Investigates actionable workflow/CI defects and proposes a focused, validated draft fix (one open proposal at a time) | `create-pull-request` |
 | [`validate-agentic-workflows.yml`](.github/workflows/validate-agentic-workflows.yml) | PR / push touching workflows | Regular (non-agentic) CI: recompiles all agentic workflows and fails if `.lock.yml` files are stale | — |
 
 Each `*.md` file has a matching, generated `*.lock.yml` file. `.gitattributes` marks the lock files as
@@ -45,6 +46,12 @@ generated so they are collapsed in diffs.
   ```
 
   See [engines](https://github.github.com/gh-aw/reference/engines/) for Claude, Codex, Gemini and others.
+
+- To let `code-improvement` propose changes to workflow files, install a GitHub App
+  with Contents, Issues, Pull requests, and Workflows write permissions. Set its client ID
+  in `GH_AW_APP_CLIENT_ID` (repository variable) and private key in
+  `GH_AW_APP_PRIVATE_KEY` (repository secret). The agent itself remains read-only;
+  the app is used only by the `create-pull-request` safe output.
 
 ## 1. Write a workflow
 
